@@ -3,6 +3,9 @@ require 'rspec/core/rake_task'
 require_relative 'db/config'
 require_relative 'lib/students_importer'
 require_relative 'app/models/teacher'
+require_relative 'app/models/student'
+require_relative 'app/models/subjects'
+require 'faker'
 
 desc "create the database"
 task "db:create" do
@@ -30,7 +33,18 @@ end
 
 desc "populate the teachers database with sample data"
 task "db:populate_teacher" do
-  # Create some teachers for your teachers table in database
+  9.times do
+    Teacher.create(name:Faker::Name.name, phone:Faker::PhoneNumber.phone_number, email:Faker::Internet.email)
+  end 
+end
+
+desc "populate the subjects database with sample data"
+task "db:populate_subject" do
+  s = Student.all.pluck(:id)
+  t = Teacher.all.pluck(:id)
+  20.times do
+    Subject.create(student_id: s.sample, teacher_id: t.sample)
+  end 
 end
 
 desc 'Retrieves the current schema version number'
@@ -42,3 +56,15 @@ desc "Run the specs"
 RSpec::Core::RakeTask.new(:specs)
 
 task :default  => :specs
+
+desc 'Find the teacher"s students'
+task "db:teacherfind" do 
+  teacher = Teacher.find(9)
+  p teacher.students
+end 
+
+desc 'Find the student"s teachers'
+task "db:studentfind" do 
+  student = Student.find(81)
+  p student.teachers  
+end 
